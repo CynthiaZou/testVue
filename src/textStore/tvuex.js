@@ -1,4 +1,4 @@
-// 实现插件
+// 实现插件own30
 // 实现store
 let Vue;
 class Store {
