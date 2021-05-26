@@ -1,6 +1,6 @@
 <div id="app">
-  <h3>{{title}}测试git提交~~~</h3>
-  <h3>{{state.title}}setup优先！！！</h3>
+  <h3>{{title}}</h3>
+  <h3>{{state.title}}</h3>
   <comp></comp>
 </div>
 
@@ -13,7 +13,7 @@
    * 函数式：类型支持ts, 摇树优化treeShaking， 打包体积小
    * 消灭静态方法， 编程实例方法
    * 避免全局污染， 实例之间相互独立
-   * const app2 = createApp({})
+   * const app2 = createApp({}) // 与下面的app是双胞胎，互不干扰
    * app.config.globalProperties.xxx
   */
  const app = createApp({

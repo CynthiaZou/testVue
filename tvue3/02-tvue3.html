@@ -1,0 +1,107 @@
+<div id="app">
+  <h3>{{title}}</h3>
+</div>
+
+<script>
+  // 手写vue3初始化 
+  const Vue = {
+    createApp(options) {
+      // 先得到渲染器
+      const renderer = Vue.createRenderer({
+        querySelector(selector) {
+          return document.querySelector(selector)
+        },
+        insert(child, parent, anchor){
+          parent.insertBefore(child, anchor || null)
+        }
+     })
+    //  返回渲染器中的createApp
+     return renderer.createApp(options)
+    },
+    // 扩展
+    createRenderer({querySelector, insert}) { // 平台特有的操作
+      // 获得渲染器
+      return {
+        createApp(options) {
+           // 返回App实例
+          return {
+            mount(selector) { // selector宿主-查询选择器
+              // 宿主
+              const parent = document.querySelector(selector)
+              // 获取渲染函数，编译的结果
+              if(!options.render) {
+                options.render = this.compile(parent.innerHTML)
+              }
+              if(options.setup) {
+                this.setupState = options.setup()
+              }
+              this.data = options.data()
+              this.proxy = new Proxy(this, {
+                // 代理目标和访问的key
+                // target指的是app
+                get(target, key) {
+                  if(key in target.setupState) {
+                    return target.setupState[key]
+                  } else {
+                    return target.data[key]
+                  }
+                }, 
+                set(target, key, val) {
+                  if(key in target.setupState) {
+                    target.setupState[key] = val
+                  } else {
+                    target.data[key] = val
+                  }
+                }
+              })
+              // 渲染dom, 追加到宿主元素
+              // this指向问题，此处需要call一下上下文,this.proxy作为上下文传过去
+              const el = options.render.call(this.proxy) 
+              parent.innerHTML = ''
+              // parent.appendChild(el)
+              insert(el, parent)
+            },
+            compile(template) {
+              // 返回render函数
+              return function render() {
+                // 描述视图
+                const h3 = document.createElement('h3')
+                h3.textContent = this.title
+                return h3
+              }
+            }
+          }
+        }
+      }
+
+    }
+  }
+</script>
+<script>
+  const { createApp } = Vue
+  /**
+   * new Vue
+   * Vue.component
+   * 函数式：类型支持ts, 摇树优化treeShaking， 打包体积小
+   * 消灭静态方法， 编程实例方法
+   * 避免全局污染， 实例之间相互独立
+   * const app2 = createApp({}) // 与下面的app是双胞胎，互不干扰
+   * app.config.globalProperties.xxx
+  */
+ const app = createApp({
+  //  统一api, 一致性
+  data() {
+    return {
+      title: 'data之hello...vue3...'
+    }
+  },
+  setup() {
+    return {
+      title: 'setup之vue3'
+    }
+  }
+ 
+ })
+// api简化、 一致性
+app.mount('#app')
+</script>
